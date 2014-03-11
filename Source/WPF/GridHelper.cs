@@ -28,15 +28,11 @@
  *
  * v1 (15 Mai 2011):
  * - initial version
- * 
  */
 
-/*
- *
- * TODO: improve GridHelper
+/* TODO: improve GridHelper
  * - support "2*"
  * - support "SharedSizeGroup=xx"
- *
 */
 
 using System;
@@ -47,15 +43,18 @@ using System.Windows.Controls;
 namespace Mkvonarx.Utils.Wpf
 {
 	/// <summary>
-	/// Utility class that allows to set Grid layouts with simple(r) attached properties directly on the Grid XML element instead of using the child elements Grid.RowDefinitions and Grid.ColumnDefinitions.
-	/// Format:
-	///		- comma separated list of rows/columns:             GridHelper.Rows="ROW1,ROW2,ROW3,..."
-	///		- possible values: "*", "Auto" or number of pixels: GridHelper.Rows="*,Auto,200"
-	///     - options can be provided in parenthesis:           GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..."
-	///     - possible options: min/max limits:                 GridHelper.Rows="*(min=100,max=200),Auto(min=100),200"
-	/// Samples:
-	///		- utils:GridHelper.Rows="Auto,*,200"
-	///		- utils:GridHelper.Columns="Auto(max=500),*(min=300),100"
+	/// Utility class that allows to set Grid layouts with simple(r) attached properties directly on the Grid XML element instead of using the child elements Grid.RowDefinitions and Grid.ColumnDefinitions. <br/>
+	/// Format: <br/>
+	///		- comma separated list of rows/columns:             GridHelper.Rows="ROW1,ROW2,ROW3,..." <br/>
+	///		- possible values: "*", "Auto" or number of pixels: GridHelper.Rows="*,Auto,200" <br/>
+	///     - options can be provided in parenthesis:           GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..." <br/>
+	///     - possible options: min/max limits:                 GridHelper.Rows="*(min=100,max=200),Auto(min=100),200" <br/>
+	/// Samples: <br/>
+	///		- utils:GridHelper.Rows="Auto,*,200" <br/>
+	///		- utils:GridHelper.Columns="Auto(max=500),*(min=300),100" <br/>
+	/// Documentation: <br/>
+	///     - GridHelper.md <br/>
+	///     - http://mkvonarx.blogspot.com/2011/05/gridhelper.html <br/>
 	/// </summary>
 	public static class GridHelper
 	{
