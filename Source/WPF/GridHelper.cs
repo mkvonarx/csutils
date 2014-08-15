@@ -14,7 +14,7 @@
  * =========================================================================================================
  * 
  * GridHelper.cs Homepage: https://sites.google.com/site/mkvonarxcode/code/gridhelper
- * GridHelper.cs Github: TODO
+ * GridHelper.cs Github: https://github.com/mkvonarx/mkvonarx-csutils/blob/master/Source/WPF/GridHelper.cs
  * 
  */
 
