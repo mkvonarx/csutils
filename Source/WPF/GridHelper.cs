@@ -20,6 +20,9 @@
 
 /* Release Notes:
  *
+ * v4 (18 May 2016):
+ * - added SharedSizeGroup=aaa option
+ * 
  * v3 (16 February 2012):
  * - fixed MaxValue->MaxHeight/MaxWidth assignement
  *
@@ -32,7 +35,6 @@
 
 /* TODO: improve GridHelper
  * - support "2*"
- * - support "SharedSizeGroup=xx"
 */
 
 using System;
@@ -45,10 +47,10 @@ namespace Mkvonarx.Utils.Wpf
 	/// <summary>
 	/// Utility class that allows to set Grid layouts with simple(r) attached properties directly on the Grid XML element instead of using the child elements Grid.RowDefinitions and Grid.ColumnDefinitions. <br/>
 	/// Format: <br/>
-	///		- comma separated list of rows/columns:             GridHelper.Rows="ROW1,ROW2,ROW3,..." <br/>
-	///		- possible values: "*", "Auto" or number of pixels: GridHelper.Rows="*,Auto,200" <br/>
-	///     - options can be provided in parenthesis:           GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..." <br/>
-	///     - possible options: min/max limits:                 GridHelper.Rows="*(min=100,max=200),Auto(min=100),200" <br/>
+	///		- comma separated list of rows/columns:                GridHelper.Rows="ROW1,ROW2,ROW3,..." <br/>
+	///		- possible values: "*", "Auto" or number of pixels:    GridHelper.Rows="*,Auto,200" <br/>
+	///     - options can be provided in parenthesis:              GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..." <br/>
+	///     - possible options: min/max limits, shared size group: GridHelper.Rows="*(min=100,max=200),Auto(min=100),200,Auto(SharedSizeGroup=abc)" <br/>
 	/// Samples: <br/>
 	///		- utils:GridHelper.Rows="Auto,*,200" <br/>
 	///		- utils:GridHelper.Columns="Auto(max=500),*(min=300),100" <br/>
@@ -78,20 +80,20 @@ namespace Mkvonarx.Utils.Wpf
 
 		private static void OnRowsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			Grid grid = d as Grid;
+			var grid = d as Grid;
 			if (grid == null)
 			{
 				return;
 			}
 
-			RowColumnDefinition[] rows = ParseXmlAttribute(e.NewValue as string);
+			var rows = ParseXmlAttribute(e.NewValue as string);
 			if (rows == null || rows.Length == 0)
 			{
 				return;
 			}
 
 			grid.RowDefinitions.Clear();
-			foreach (RowColumnDefinition row in rows)
+			foreach (var row in rows)
 			{
 				RowDefinition newRowDefinition;
 				switch (row.Type)
@@ -114,6 +116,10 @@ namespace Mkvonarx.Utils.Wpf
 				if (row.MaxValue.HasValue)
 				{
 					newRowDefinition.MaxHeight = row.MaxValue.Value;
+				}
+				if (!string.IsNullOrEmpty(row.SharedSizeGroup))
+				{
+					newRowDefinition.SharedSizeGroup = row.SharedSizeGroup;
 				}
 				grid.RowDefinitions.Add(newRowDefinition);
 			}
@@ -141,20 +147,20 @@ namespace Mkvonarx.Utils.Wpf
 
 		private static void OnColumnsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			Grid grid = d as Grid;
+			var grid = d as Grid;
 			if (grid == null)
 			{
 				return;
 			}
-			
-			RowColumnDefinition[] columns = ParseXmlAttribute(e.NewValue as string);
+
+			var columns = ParseXmlAttribute(e.NewValue as string);
 			if (columns == null || columns.Length == 0)
 			{
 				return;
 			}
 
 			grid.ColumnDefinitions.Clear();
-			foreach (RowColumnDefinition column in columns)
+			foreach (var column in columns)
 			{
 				ColumnDefinition newColumnDefinition;
 				switch (column.Type)
@@ -166,7 +172,7 @@ namespace Mkvonarx.Utils.Wpf
 						newColumnDefinition = new ColumnDefinition { Width = new GridLength(column.ExactValue.Value) };
 						break;
 					default:
-					//case RowColumnType.Star:
+						//case RowColumnType.Star:
 						newColumnDefinition = new ColumnDefinition();
 						break;
 				}
@@ -177,6 +183,10 @@ namespace Mkvonarx.Utils.Wpf
 				if (column.MaxValue.HasValue)
 				{
 					newColumnDefinition.MaxWidth = column.MaxValue.Value;
+				}
+				if (!string.IsNullOrEmpty(column.SharedSizeGroup))
+				{
+					newColumnDefinition.SharedSizeGroup = column.SharedSizeGroup;
 				}
 				grid.ColumnDefinitions.Add(newColumnDefinition);
 			}
@@ -199,26 +209,27 @@ namespace Mkvonarx.Utils.Wpf
 			public double? ExactValue { get; set; }
 			public double? MinValue { get; set; }
 			public double? MaxValue { get; set; }
+			public string SharedSizeGroup { get; set; }
 		}
 
 		private static RowColumnDefinition[] ParseXmlAttribute(string xmlAttribute)
 		{
-			if(string.IsNullOrEmpty(xmlAttribute))
+			if (string.IsNullOrEmpty(xmlAttribute))
 			{
 				return null;
 			}
 
-			List<RowColumnDefinition> result = new List<RowColumnDefinition>();
-			
-			string[] allSubValues = xmlAttribute.Split(',');
-			foreach (string subValue in allSubValues)
+			var result = new List<RowColumnDefinition>();
+
+			var allSubValues = xmlAttribute.Split(',');
+			foreach (var subValue in allSubValues)
 			{
-				string subValueCopy = subValue;
+				var subValueCopy = subValue;
 
 				// has options?
 				string options = null;
-				int optionsBegin = subValueCopy.IndexOf('(');
-				int optionsEnd = subValueCopy.IndexOf(')');
+				var optionsBegin = subValueCopy.IndexOf('(');
+				var optionsEnd = subValueCopy.IndexOf(')');
 				if ((optionsBegin != -1) && (optionsEnd != -1) && (optionsBegin < optionsEnd))
 				{
 					options = subValueCopy.Substring(optionsBegin + 1, optionsEnd - optionsBegin - 1);
@@ -229,7 +240,7 @@ namespace Mkvonarx.Utils.Wpf
 				RowColumnDefinition rowColumnDefinition = null;
 				if (subValueCopy == "*")
 				{
-					rowColumnDefinition = new RowColumnDefinition {Type = RowColumnType.Star};
+					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Star };
 				}
 				else if (string.Compare(subValueCopy, "auto", StringComparison.OrdinalIgnoreCase) == 0)
 				{
@@ -252,10 +263,10 @@ namespace Mkvonarx.Utils.Wpf
 				// parse options
 				if (options != null)
 				{
-					string[] allOptions = options.Split(',');
-					foreach (string option in allOptions)
+					var allOptions = options.Split(',');
+					foreach (var option in allOptions)
 					{
-						string[] keyValuePair = option.Split('=');
+						var keyValuePair = option.Split('=');
 						if (keyValuePair.Length == 2)
 						{
 							double v;
@@ -267,8 +278,13 @@ namespace Mkvonarx.Utils.Wpf
 							{
 								rowColumnDefinition.MaxValue = v;
 							}
+							else if ((string.Compare(keyValuePair[0], "SharedSizeGroup", StringComparison.OrdinalIgnoreCase) == 0) && !string.IsNullOrEmpty(keyValuePair[1]))
+							{
+								rowColumnDefinition.SharedSizeGroup = keyValuePair[1];
+							}
 							// else: ignore (skip)
 						}
+						// else: ignore (skip)
 					}
 				}
 
@@ -277,7 +293,7 @@ namespace Mkvonarx.Utils.Wpf
 
 			return result.ToArray();
 		}
-	
+
 		#endregion Utils
 	}
 }
