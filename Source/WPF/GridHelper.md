@@ -52,7 +52,7 @@ Format of attributes:
 * comma separated list of rows/columns: GridHelper.Rows="ROW1,ROW2,ROW3,..."
 * possible values: "*", "Auto" or number of pixels: GridHelper.Rows="*,Auto,200"
 * options can be provided in parenthesis: GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..."
-* possible options: min/max limits: GridHelper.Rows="*(Min=100,Max=200),Auto(Min=100),200"
+* possible options: min/max limits, shared size group: GridHelper.Rows="*(Min=100,Max=200),Auto(Min=100),200,Auto(SharedSizeGroup=abc)"
 
 Samples:
 
