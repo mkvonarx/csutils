@@ -18,7 +18,6 @@ using System.Windows.Controls;
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * =========================================================================================================
  * 
- * GridHelper.cs Homepage: https://sites.google.com/site/mkvonarxcode/code/gridhelper
  * GridHelper.cs Github: https://github.com/mkvonarx/mkvonarx-csutils/blob/master/Source/WPF/GridHelper.cs
  * 
  */
@@ -46,16 +45,15 @@ namespace Mkvonarx.Utils.Wpf
 	/// <summary>
 	/// Utility class that allows to set Grid layouts with simple(r) attached properties directly on the Grid XML element instead of using the child elements Grid.RowDefinitions and Grid.ColumnDefinitions. <br/>
 	/// Format: <br/>
-	///		- comma separated list of rows/columns:                GridHelper.Rows="ROW1,ROW2,ROW3,..." <br/>
-	///		- possible values: "*", "Auto" or number of pixels:    GridHelper.Rows="*,Auto,200" <br/>
-	///     - options can be provided in parenthesis:              GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..." <br/>
-	///     - possible options: min/max limits, shared size group: GridHelper.Rows="*(min=100,max=200),Auto(min=100),200,Auto(SharedSizeGroup=abc)" <br/>
+	///		- comma separated list of rows/columns:                                      GridHelper.Rows="ROW1,ROW2,ROW3,..." <br/>
+	///		- supported size values:                  "*", "2*", "Auto" or "200":        GridHelper.Rows="*,Auto,200,2*" <br/>
+	///     - options can be provided in parenthesis:                                    GridHelper.Rows="ROW1(OPTIONS1),ROW2(OPTIONS2),ROW3(OPTIONS3),..." <br/>
+	///     - supported options:                      min/max limits, shared size group: GridHelper.Rows="*(min=100,max=200),Auto(min=100),200,Auto(SharedSizeGroup=abc)" <br/>
 	/// Samples: <br/>
-	///		- utils:GridHelper.Rows="Auto,*,200" <br/>
+	///		- utils:GridHelper.Rows="Auto,*,200,2*" <br/>
 	///		- utils:GridHelper.Columns="Auto(max=500),*(min=300),100" <br/>
 	/// Documentation: <br/>
-	///     - GridHelper.md <br/>
-	///     - http://mkvonarx.blogspot.com/2011/05/gridhelper.html <br/>
+	///     - https://github.com/mkvonarx/mkvonarx-csutils/blob/master/Source/WPF/ <br/>
 	/// </summary>
 	public static class GridHelper
 	{
