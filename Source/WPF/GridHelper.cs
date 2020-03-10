@@ -1,4 +1,9 @@
-﻿/* 
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+
+/* 
  * =========================================================================================================
  * 3-clause BSD license for GridHelper.cs (see http://www.opensource.org/licenses/bsd-license.php)
  * -----------------------------------------------------------------------------------------------
@@ -20,6 +25,9 @@
 
 /* Release Notes:
  *
+ * v5 (10 March 2020)
+ * - support multiple star values (e.g. 2*)
+ *
  * v4 (18 May 2016):
  * - added SharedSizeGroup=aaa option
  * 
@@ -32,15 +40,6 @@
  * v1 (15 Mai 2011):
  * - initial version
  */
-
-/* TODO: improve GridHelper
- * - support "2*"
-*/
-
-using System;
-using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace Mkvonarx.Utils.Wpf
 {
@@ -86,14 +85,14 @@ namespace Mkvonarx.Utils.Wpf
 				return;
 			}
 
-			var rows = ParseXmlAttribute(e.NewValue as string);
+			RowColumnDefinition[] rows = ParseXmlAttribute(e.NewValue as string);
 			if (rows == null || rows.Length == 0)
 			{
 				return;
 			}
 
 			grid.RowDefinitions.Clear();
-			foreach (var row in rows)
+			foreach (RowColumnDefinition row in rows)
 			{
 				RowDefinition newRowDefinition;
 				switch (row.Type)
@@ -101,12 +100,12 @@ namespace Mkvonarx.Utils.Wpf
 					case RowColumnType.Auto:
 						newRowDefinition = new RowDefinition { Height = GridLength.Auto };
 						break;
-					case RowColumnType.Exact:
-						newRowDefinition = new RowDefinition { Height = new GridLength(row.ExactValue.Value) };
+					case RowColumnType.Pixel:
+						newRowDefinition = new RowDefinition { Height = new GridLength(row.Value, GridUnitType.Pixel) };
 						break;
 					default:
 						//case RowColumnType.Star:
-						newRowDefinition = new RowDefinition();
+						newRowDefinition = new RowDefinition { Height = new GridLength(row.Value, GridUnitType.Star) };
 						break;
 				}
 				if (row.MinValue.HasValue)
@@ -153,14 +152,14 @@ namespace Mkvonarx.Utils.Wpf
 				return;
 			}
 
-			var columns = ParseXmlAttribute(e.NewValue as string);
+			RowColumnDefinition[] columns = ParseXmlAttribute(e.NewValue as string);
 			if (columns == null || columns.Length == 0)
 			{
 				return;
 			}
 
 			grid.ColumnDefinitions.Clear();
-			foreach (var column in columns)
+			foreach (RowColumnDefinition column in columns)
 			{
 				ColumnDefinition newColumnDefinition;
 				switch (column.Type)
@@ -168,12 +167,12 @@ namespace Mkvonarx.Utils.Wpf
 					case RowColumnType.Auto:
 						newColumnDefinition = new ColumnDefinition { Width = GridLength.Auto };
 						break;
-					case RowColumnType.Exact:
-						newColumnDefinition = new ColumnDefinition { Width = new GridLength(column.ExactValue.Value) };
+					case RowColumnType.Pixel:
+						newColumnDefinition = new ColumnDefinition { Width = new GridLength(column.Value, GridUnitType.Pixel) };
 						break;
 					default:
 						//case RowColumnType.Star:
-						newColumnDefinition = new ColumnDefinition();
+						newColumnDefinition = new ColumnDefinition { Width = new GridLength(column.Value, GridUnitType.Star) };
 						break;
 				}
 				if (column.MinValue.HasValue)
@@ -200,13 +199,13 @@ namespace Mkvonarx.Utils.Wpf
 		{
 			Star,
 			Auto,
-			Exact
+			Pixel
 		}
 
 		private class RowColumnDefinition
 		{
 			public RowColumnType Type { get; set; }
-			public double? ExactValue { get; set; }
+			public double Value { get; set; }
 			public double? MinValue { get; set; }
 			public double? MaxValue { get; set; }
 			public string SharedSizeGroup { get; set; }
@@ -221,15 +220,15 @@ namespace Mkvonarx.Utils.Wpf
 
 			var result = new List<RowColumnDefinition>();
 
-			var allSubValues = xmlAttribute.Split(',');
-			foreach (var subValue in allSubValues)
+			string[] allSubValues = xmlAttribute.Split(',');
+			foreach (string subValue in allSubValues)
 			{
-				var subValueCopy = subValue;
+				string subValueCopy = subValue;
 
 				// has options?
 				string options = null;
-				var optionsBegin = subValueCopy.IndexOf('(');
-				var optionsEnd = subValueCopy.IndexOf(')');
+				int optionsBegin = subValueCopy.IndexOf('(');
+				int optionsEnd = subValueCopy.IndexOf(')');
 				if ((optionsBegin != -1) && (optionsEnd != -1) && (optionsBegin < optionsEnd))
 				{
 					options = subValueCopy.Substring(optionsBegin + 1, optionsEnd - optionsBegin - 1);
@@ -240,21 +239,21 @@ namespace Mkvonarx.Utils.Wpf
 				RowColumnDefinition rowColumnDefinition = null;
 				if (subValueCopy == "*")
 				{
-					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Star };
+					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Star, Value = 1.0 };
+				}
+				else if (subValueCopy.EndsWith("*") && double.TryParse(subValueCopy.Substring(0, subValueCopy.Length - 1), out double value1))
+				{
+					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Star, Value = value1 };
 				}
 				else if (string.Compare(subValueCopy, "auto", StringComparison.OrdinalIgnoreCase) == 0)
 				{
 					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Auto };
 				}
-				else
+				else if (double.TryParse(subValueCopy, out double value2))
 				{
-					double exactValue;
-					if (double.TryParse(subValueCopy, out exactValue))
-					{
-						rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Exact, ExactValue = exactValue };
-					}
-					// else: ignore (skip)
+					rowColumnDefinition = new RowColumnDefinition { Type = RowColumnType.Pixel, Value = value2 };
 				}
+				// else: ignore (skip)
 				if (rowColumnDefinition == null)
 				{
 					continue;
@@ -263,10 +262,10 @@ namespace Mkvonarx.Utils.Wpf
 				// parse options
 				if (options != null)
 				{
-					var allOptions = options.Split(',');
-					foreach (var option in allOptions)
+					string[] allOptions = options.Split(',');
+					foreach (string option in allOptions)
 					{
-						var keyValuePair = option.Split('=');
+						string[] keyValuePair = option.Split('=');
 						if (keyValuePair.Length == 2)
 						{
 							double v;
